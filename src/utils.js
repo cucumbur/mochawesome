@@ -141,15 +141,23 @@ function normalizeErr(err, config) {
 
   // Assertion libraries do not output consitent error objects so in order to
   // get a consistent message object we need to create it ourselves
-  if (name && message) {
-    errMessage = `${name}: ${stripAnsi(message)}`;
+
+  const trimregex = /[\s\S]+?(?=Hierarchy)/
+  const trimmedMessage = trimregex.exec(message)
+  if (name && trimmedMessage) {
+    errMessage = `${name}: ${stripAnsi(trimmedMessage)}`;
   } else if (stack) {
     errMessage = stack.replace(/\n.*/g, '');
   }
 
+  const trimmedStack = _.truncate(stack, {
+    'length': 1024,
+    'omission': ''
+  });
+
   return {
-    message: errMessage,
-    estack: stack && stripAnsi(stack),
+    message: trimmedMessage,
+    estack: trimmedStack && stripAnsi(trimmedStack),
     diff: errDiff
   };
 }
